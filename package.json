@@ -4,7 +4,7 @@
   "description": "A simple Web Crawler written in Nodejs",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node --no-warnings main.js",
     "test": "jest"
   },
   "repository": {
@@ -19,5 +19,8 @@
   "homepage": "https://github.com/dzabeligan/web-crawler-http#readme",
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "jsdom": "^22.1.0"
   }
 }
