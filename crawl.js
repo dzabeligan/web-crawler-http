@@ -3,8 +3,7 @@ const { JSDOM } = require("jsdom");
 async function crawlPage(baseURL, currentURL, pagesVisited) {
   let htmlBody = "";
   try {
-    const currentURLObj = new URL(currentURL);
-    if (currentURLObj.hostname !== new URL(baseURL).hostname) {
+    if (new URL(currentURL).hostname !== new URL(baseURL).hostname) {
       return pagesVisited;
     }
 
@@ -14,8 +13,6 @@ async function crawlPage(baseURL, currentURL, pagesVisited) {
       return pagesVisited;
     }
     pagesVisited[normalizedURL] = 1;
-
-    currentURL = `${currentURLObj.protocol}//${normalizedURL}`;
 
     console.log(`crawling ${currentURL}`);
 
@@ -40,6 +37,13 @@ async function crawlPage(baseURL, currentURL, pagesVisited) {
   return pagesVisited;
 }
 
+const removeTrailingSlash = (url) => {
+  if (url.endsWith("/")) {
+    return url.slice(0, -1);
+  }
+  return url;
+};
+
 function getURLsFromHTML(htmlBody, baseURL) {
   const urls = [];
   const dom = new JSDOM(htmlBody);
@@ -47,9 +51,9 @@ function getURLsFromHTML(htmlBody, baseURL) {
   dom.window.document.querySelectorAll("a").forEach((link) => {
     const href = link.getAttribute("href");
     if (href && href.startsWith("http")) {
-      urls.push(href);
+      urls.push(removeTrailingSlash(href));
     } else if (href && href.startsWith("/")) {
-      urls.push(`${baseURL}${href}`);
+      urls.push(removeTrailingSlash(`${baseURL}${href}`));
     }
   });
   return urls;
@@ -60,10 +64,7 @@ function normalizeURL(urlString) {
     const urlObj = new URL(urlString);
     const hostPath = `${urlObj.host}${urlObj.pathname}`;
 
-    if (hostPath.length > 0 && hostPath.endsWith("/")) {
-      return hostPath.slice(0, -1);
-    }
-    return hostPath;
+    return removeTrailingSlash(hostPath);
   } catch (error) {
     console.log(`error parsing ${urlString}: ${error}`);
     return "";
